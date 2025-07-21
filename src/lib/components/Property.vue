@@ -21,32 +21,20 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue']);
 
-const label = computed(() => {
-  var label = props.definition.label || props.definition.name || props.definition.id;
-  if (typeof label !== 'string') label = 'error';
-  var namespace;
-  var isUrl;
-  try {
-    const url = new URL(label);
-    if (url.host) {
-      label = url.pathname.split('/').pop();
-      isUrl = true;
-    }
-  } catch (error) {
-  }
-  if (!isUrl) {
-    let m = label.match(/(.+):(.+)/);
-    if (m) [, namespace, label] = m;
-  }
-  label = label.charAt(0).toUpperCase() + label.slice(1);
-  return label.replace(/([a-z])([A-Z])/g, '$1 $2');
-});
+let label = props.definition.label || props.definition.name || props.definition.id;
 
-const isReverse = computed(() => {
-  if (props.definition.isReverse) {
-    return true;
-  }
-});
+if (typeof label !== 'string') label = 'error';
+
+if (URL.canParse(label)) {
+  const url = new URL(label);
+  label = url.pathname.split('/').pop();
+  let m = label.match(/(.+):(.+)/);
+  if (m) [, namespace, label] = m;
+}
+label = label.charAt(0).toUpperCase() + label.slice(1);
+label = label.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+const isReverse = props.definition.isReverse;
 
 const values = computed(() => {
   const value = toRaw(props.modelValue);
